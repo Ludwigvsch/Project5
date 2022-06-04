@@ -191,12 +191,26 @@ void BinarySearchTree<Item>::inorder(Node<Item>* node, std::function<void(Node<I
 
 template<typename Item>
 void BinarySearchTree<Item>::postorder(Node<Item>* node, std::function<void(Node<Item>*)> proc) {
+	if (node == nullptr)
+		return;
+	
+	postorder(node->left, proc);
+	postorder(node->right, proc);
+	proc(node);
+	
 	
 	//********* TODO **********
 
 }
+
 template<typename Item>
 void BinarySearchTree<Item>::preorder(Node<Item>* node, std::function<void(Node<Item>*)> proc) {
+	if (node == nullptr)
+		return;
+	
+	proc(node);
+	preorder(node->left, proc);
+	preorder(node->right, proc);
 	
 	//********* TODO **********
 }
@@ -205,17 +219,43 @@ void BinarySearchTree<Item>::preorder(Node<Item>* node, std::function<void(Node<
 // to the rules of the BST.  
 template<typename Item>
 Node<Item>* BinarySearchTree<Item>::insert(Node<Item>* node, Item item) {
-
-	//********* TODO **********
-	return nullptr;
+	if (node == nullptr) {
+		return new Node<Item>(item, nullptr, nullptr);
+	}
+	if (item == node->item) {
+		return node;
+	}
+	if (item < node->item) {
+		if ( node->left != nullptr) {
+			insert(node->left, item);
+		}else {
+			node->left = new Node<Item>(item, nullptr, nullptr);
+		}
+		return node;
+	}
+	if (node->right != nullptr) {
+		insert(node->right, item);
+	} else {
+		node->right = new Node<Item>(item, nullptr, nullptr);
+	}
+	return node;
 }
 
 // BinarySearchTree<Item>::find recursively searches the tree for item.
 template<typename Item>
 bool BinarySearchTree<Item>::find(Node<Item>* node, Item item) const {
-
-	//********* TODO **********
-	return false;
+	if (node == nullptr) {
+		return false;
+	}
+	else if (item == node->item) {
+		return true;
+	}
+	else if (item < node->item) {
+		return find(node->left, item);
+	}
+	else {
+		return find(node->right, item);
+	}
 }
 
 // BinarySearchTree<Item>::height
@@ -224,23 +264,30 @@ bool BinarySearchTree<Item>::find(Node<Item>* node, Item item) const {
 template<typename Item>
 int	BinarySearchTree<Item>::height(Node<Item>* node) const {
 
-	//********* TODO **********
-	return -2;
+    if (node == nullptr) {
+        return 0;
+
+    }
+    return std::max(height(node->left), height(node->right)) + 1;
+
 }
+
 // BinarySearchTree<Item>::min recursively obtain the node with the minimum item
 template<typename Item>
 Node<Item>* BinarySearchTree<Item>::min(Node<Item>* node) const {
-
-	//********* TODO **********
-	return nullptr;
+	if (node->left == nullptr) {
+		return node;
+	}
+	return min(node->left);
 }
 
 // BinarySearchTree<Item>::max recursively obtain the node with the minimum item
 template<typename Item>
 Node<Item>* BinarySearchTree<Item>::max(Node<Item>* node) const {
-	
-	//********* TODO **********
-	return nullptr;
+	if (node->right == nullptr) {
+		return node;
+	}
+	return max(node->right);
 }
 
 // BinarySearchTree<Item>::printTree
@@ -259,8 +306,15 @@ Node<Item>* BinarySearchTree<Item>::max(Node<Item>* node) const {
 template<typename Item>
 void BinarySearchTree<Item>::printTree(Node<Item>* node, int space) const {
 
-	//********* TODO **********
-	
+	if (node == nullptr) {
+		return;
+	}
+	printTree(node->right, space + 5);
+	for (int i = 0; i < space; i++) {
+		std::cout << " ";
+	}
+	std::cout << node->item << std::endl;
+	printTree(node->left, space + 5);
 }
 
 
@@ -291,8 +345,46 @@ void BinarySearchTree<Item>::printTree(Node<Item>* node, int space) const {
 template<typename Item>
 Node<Item>* BinarySearchTree<Item>::remove(Node<Item>* node, Item item) {
 
-	//********* TODO **********
-	return nullptr;
+	if (node == nullptr) {
+		return node;
+	}
+	if (item < node->item) {
+		node->left = remove(node->left, item);
+	}
+	else if (item > node->item) {
+		node->right = remove(node->right, item);
+	}
+	else {
+		//case 1
+		if (node->left == nullptr && node->right == nullptr) {
+			delete node;
+			return nullptr;
+		}
+		//case 2
+		if (node->left != nullptr && node->right == nullptr) {
+			Node<Item>* temp = node->left;
+			delete node;
+			return temp;
+		}
+		if (node->right != nullptr && node->left == nullptr) {
+			Node<Item>* temp = node->right;
+			delete node;
+			return temp;
+		}
+		//case 3
+		if (height(node->left) > height(node->right)) {
+			Node<Item>* temp = max(node->left);
+			node->item = temp->item;
+			node->left = remove(node->left, temp->item);
+		}
+		else {
+			Node<Item>* temp = min(node->right);
+			node->item = temp->item;
+			node->right = remove(node->right, temp->item);
+		}
+		
+	}
+	return node;
 }
 
 
